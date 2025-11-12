@@ -83,6 +83,10 @@
                 <span class="mr-2">📤</span> Carregar (JSON)
                 <input type="file" id="loadJson" accept=".json" class="hidden" onchange="loadJSON(event)">
             </label>
+            <label for="loadTxt" class="flex-1 cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 flex items-center justify-center">
+                <span class="mr-2">📄</span> Carregar (TXT)
+                <input type="file" id="loadTxt" accept=".txt" class="hidden" onchange="loadTXT(event)">
+            </label>
         </div>
 
         <!-- Seção 1: Identificação -->
@@ -602,6 +606,67 @@
                 }
             };
             reader.readAsText(file);
+        }
+
+        // 5. Carregar dados de um arquivo TXT do dispositivo
+        function loadTXT(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const text = e.target.result;
+                    const data = parseTXT(text);
+                    applyData(data);
+                    console.log("Dados carregados com sucesso do TXT.");
+                } catch (error) {
+                    console.error("Erro ao carregar ou parsear o arquivo TXT:", error);
+                    alert("Erro ao carregar o arquivo. Verifique se é um arquivo TXT válido.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function parseTXT(text) {
+            const data = {};
+            let lastKey = null;
+
+            const validKeys = new Set();
+            document.querySelectorAll('[data-key], [data-key-prefix]').forEach(el => {
+                if (el.dataset.key) validKeys.add(el.dataset.key);
+                if (el.dataset.keyPrefix) validKeys.add(el.dataset.keyPrefix);
+            });
+
+            const listKeys = ['objetivo_item', 'medicamento', 'sintoma', 'refeicao', 'fa_frequente', 'fa_naofrequente'];
+            const textAreaKeys = ['objetivoPrincipal', 'dificuldades', 'preocupacoesSaude', 'condicoesSaudeTexto', 'digestao', 'sono', 'habitosGerais'];
+
+            const lines = text.split('\n');
+
+            lines.forEach(line => {
+                const parts = line.split(/:(.*)/s);
+                const potentialKey = parts.length > 1 ? parts[0].trim() : null;
+
+                if (potentialKey && validKeys.has(potentialKey)) {
+                    const key = potentialKey;
+                    const value = parts[1].trim();
+                    lastKey = key;
+
+                    if (listKeys.includes(key)) {
+                        if (!data[key]) {
+                            data[key] = [];
+                        }
+                        data[key].push(value);
+                    } else {
+                        data[key] = value;
+                    }
+                } else {
+                    if (lastKey && textAreaKeys.includes(lastKey) && data[lastKey] !== undefined) {
+                        data[lastKey] += '\n' + line;
+                    }
+                }
+            });
+            return data;
         }
 
         // =================================================================
