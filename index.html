@@ -89,15 +89,15 @@
             <div class="space-y-4">
                 <div>
                     <label class="font-semibold text-slate-600">Seus hábitos alimentares atuais:</label>
-                    <textarea data-key="habitosAtuais" class="editable-field w-full h-16 resize-none p-1">Sua alimentação é descrita como "aleatória e sem disciplina".</textarea>
+                    <textarea data-key="habitosAtuais" class="editable-field w-full resize-none p-1" oninput="autoResizeTextarea(this)">Sua alimentação é descrita como "aleatória e sem disciplina".</textarea>
                 </div>
                 <div>
                     <label class="font-semibold text-slate-600">Sua rotina e estilo de vida:</label>
-                    <textarea data-key="rotinaVida" class="editable-field w-full h-16 resize-none p-1">Ao passar mais tempo em casa e trabalhar menos, o hábito de beliscar muito ao longo do dia inteiro foi incorporado.</textarea>
+                    <textarea data-key="rotinaVida" class="editable-field w-full resize-none p-1" oninput="autoResizeTextarea(this)">Ao passar mais tempo em casa e trabalhar menos, o hábito de beliscar muito ao longo do dia inteiro foi incorporado.</textarea>
                 </div>
                 <div>
                     <label class="font-semibold text-slate-600">O que te trouxe para a consulta:</label>
-                    <textarea data-key="motivoConsulta" class="editable-field w-full h-16 resize-none p-1">O serviço foi procurado com o objetivo principal de melhorar a alimentação, buscando a melhora da estética e a diminuição da gordura corporal.</textarea>
+                    <textarea data-key="motivoConsulta" class="editable-field w-full resize-none p-1" oninput="autoResizeTextarea(this)">O serviço foi procurado com o objetivo principal de melhorar a alimentação, buscando a melhora da estética e a diminuição da gordura corporal.</textarea>
                 </div>
             </div>
             <p class="text-sm text-slate-500 mt-6 italic border-t pt-4">Este guia foi elaborado para consolidar todas as orientações, objetivos e planos definidos em nossa consulta, servindo como seu roteiro principal para as próximas semanas.</p>
@@ -241,7 +241,7 @@
                 <h3 class="text-2xl font-bold text-slate-800 mb-4 flex items-center"><span class="text-3xl mr-3">🎯</span> Nosso Grande Objetivo Juntos</h3>
                 <div>
                     <label class="font-semibold text-slate-600">Objetivo Principal (Nosso Norte):</label>
-                    <textarea data-key="objetivoPrincipalGrande" class="editable-field w-full h-16 resize-none p-1 bg-amber-50">Alcançar 8kg de perda de peso de forma saudável em 3 meses, com foco em reeducação alimentar.</textarea>
+                    <textarea data-key="objetivoPrincipalGrande" class="editable-field w-full resize-none p-1 bg-amber-50" oninput="autoResizeTextarea(this)">Alcançar 8kg de perda de peso de forma saudável em 3 meses, com foco em reeducação alimentar.</textarea>
                 </div>
                 <div class="mt-4">
                     <label class="font-semibold text-slate-600">Outros Objetivos Importantes:</label>
@@ -381,7 +381,12 @@
                     }
                 } else {
                     const el = document.querySelector(`[data-key="${key}"]`);
-                    if (el) el.value = data[key];
+                    if (el) {
+                        el.value = data[key];
+                        if (el.tagName.toLowerCase() === 'textarea') {
+                            autoResizeTextarea(el);
+                        }
+                    }
                 }
             }
         }
@@ -467,8 +472,17 @@
             return data;
         }
 
+        function autoResizeTextarea(element) {
+            element.style.height = 'auto';
+            element.style.height = (element.scrollHeight) + 'px';
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             applyData(INITIAL_DATA);
+            document.querySelectorAll('textarea.editable-field').forEach(textarea => {
+                autoResizeTextarea(textarea);
+                textarea.addEventListener('input', () => autoResizeTextarea(textarea));
+            });
         });
     </script>
 </body>
