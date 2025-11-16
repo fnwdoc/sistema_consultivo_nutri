@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha de Anamnese Nutricional - Avaliação Completa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Definindo a fonte Inter como padrão */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fc; /* Fundo suave */
+        }
+        .text-accent { color: #0284c7; } /* Azul suave para destaque (sky-600) */
+        .bg-accent-light { background-color: #f0f8ff; } /* Azul muito claro */
+        .card {
+            border-left: 4px solid #0284c7; /* Linha de destaque para as seções */
+        }
+        /* Estilo para campos editáveis */
+        .editable-field {
+            border: none;
+            border-bottom: 1px dashed #94a3b8; /* slate-400 */
+            background-color: transparent;
+            width: 100%;
+            transition: border-bottom-color 0.2s;
+        }
+        .editable-field:focus {
+            outline: none;
+            border-bottom-color: #0284c7;
+        }
+
+        /* ESTILOS PARA IMPRESSÃO (NOVA FUNCIONALIDADE) */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .editable-field {
+                border-bottom: none !important;
+                padding: 0 !important;
+                /* Assegura que o texto editável não quebre a formatação na impressão */
+            }
+            body {
+                background-color: white;
+            }
+            .card {
+                border-left: 1px solid #ccc;
+            }
+            /* QUEBRA DE PÁGINA: Força a quebra de página antes de cada seção */
+            .page-break {
+                page-break-before: always;
+                margin-top: 0 !important; /* Remove margem desnecessária no topo da página */
+            }
+            /* O cabeçalho e os botões não devem ter quebra de página */
+            #identificacao {
+                page-break-before: auto !important;
+            }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <!-- Cabeçalho e Introdução -->
+        <header class="mb-10 bg-white p-6 rounded-2xl shadow-xl">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Ficha de Anamnese Nutricional Completa</h1>
+            <h2 class="text-xl text-gray-600 mb-4">Avaliação Inicial do Paciente</h2>
+            <p class="text-gray-700 italic border-t pt-4 mt-4">
+                Olá <input type="text" data-key="nomePaciente" value="[Nome do Paciente]" class="editable-field text-lg font-semibold w-auto" style="width: 150px;">,
+                Foi um prazer te receber e conversar sobre sua saúde e seus objetivos! Este documento consolida todas as informações para traçarmos o melhor caminho em direção aos seus resultados.
+            </p>
+        </header>
+
+        <!-- Botões de Ação (No Print) -->
+        <div class="no-print flex flex-wrap justify-between gap-4 mb-8 p-4 bg-white rounded-xl shadow-lg">
+            <button onclick="window.print()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300">
+                <span class="mr-2">🖨️</span> Imprimir
+            </button>
+            <button onclick="saveDataAsJSON()" class="flex-1 bg-accent hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300">
+                <span class="mr-2">💾</span> Salvar (JSON)
+            </button>
+            <label for="loadJson" class="flex-1 cursor-pointer bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 flex items-center justify-center">
+                <span class="mr-2">📤</span> Carregar (JSON)
+                <input type="file" id="loadJson" accept=".json" class="hidden" onchange="loadJSON(event)">
+            </label>
+            <label for="loadTxt" class="flex-1 cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 flex items-center justify-center">
+                <span class="mr-2">📄</span> Carregar (TXT)
+                <input type="file" id="loadTxt" accept=".txt" class="hidden" onchange="loadTXT(event)">
+            </label>
+        </div>
+
+        <!-- Seção 1: Identificação -->
+        <section id="identificacao" class="card bg-white p-6 mb-8 rounded-2xl shadow-lg page-break">
+            <div class="flex items-center mb-4">
+                <span class="text-3xl mr-3 text-accent">👤</span>
+                <h3 class="text-2xl font-bold text-gray-800">1. Identificação</h3>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-gray-700">
+                <div class="p-2 border rounded-lg">
+                    <p class="font-medium text-sm text-gray-500">Idade / Nasc.:</p>
+                    <input type="text" data-key="idadeNasc" value="42 anos (28/02/1980)" class="editable-field">
+                </div>
+                <div class="p-2 border rounded-lg">
+                    <p class="font-medium text-sm text-gray-500">Estado Civil / Filhos:</p>
+                    <input type="text" data-key="estadoCivil" value="Casado, 1 filho (11 anos)" class="editable-field">
+                </div>
+                <div class="p-2 border rounded-lg col-span-2">
+                    <p class="font-medium text-sm text-gray-500">Profissão:</p>
+                    <input type="text" data-key="profissao" value="Engenheiro Mecânico - Gerente de Engenharia" class="editable-field">
+                </div>
+                <div class="p-2 border rounded-lg">
+                    <p class="font-medium text-sm text-gray-500">Peso (Kg):</p>
+                    <input type="text" data-key="peso" value="98 Kg (Mantido 12m)" class="editable-field">
+                </div>
+                <div class="p-2 border rounded-lg">
+                    <p class="font-medium text-sm text-gray-500">Altura (m):</p>
+                    <input type="text" data-key="altura" value="1,89 m" class="editable-field">
+                </div>
+                <div class="p-2 border rounded-lg">
+                    <p class="font-medium text-sm text-gray-500">IMC (kg/m²):</p>
+                    <input type="text" data-key="imc" value="27,43 kg/m²" class="editable-field">
+                </div>
+                <div class="p-2 border rounded-lg">
+                    <p class="font-medium text-sm text-gray-500">Pressão Arterial:</p>
+                    <input type="text" data-key="pa" value="130/80 (29/11/2022)" class="editable-field">
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 2: Procura do Serviço -->
+        <section id="procura-servico" class="card bg-white p-6 mb-8 rounded-2xl shadow-lg page-break">
+            <div class="flex items-center mb-4">
+                <span class="text-3xl mr-3 text-accent">🎯</span>
+                <h3 class="text-2xl font-bold text-gray-800">2. Procura do Serviço e Objetivos</h3>
+            </div>
+            <div class="space-y-4">
+                <div class="border p-4 rounded-xl bg-accent-light">
+                    <p class="font-semibold text-gray-600 mb-2">2.1 - O que você está buscando com o apoio desse serviço ?</p>
+                    <textarea data-key="objetivoPrincipal" class="editable-field resize-none h-16 p-2">Perder a barriga (estética) e melhorar a situação do ronco.</textarea>
+                </div>
+                <div class="border p-4 rounded-xl">
+                    <p class="font-semibold text-gray-600 mb-2">2.2 - Alguma situação traz dificuldades para você atingir o que está buscando?</p>
+                    <textarea data-key="dificuldades" class="editable-field resize-none h-16 p-2">Consumo frequente de álcool e ingestão de doces e biscoitos ao longo dos dias.</textarea>
+                </div>
+                <div class="border p-4 rounded-xl bg-accent-light">
+                    <p class="font-semibold text-gray-600 mb-2">2.3 - Você tem alguma preocupação específica com sua saúde ?</p>
+                    <textarea data-key="preocupacoesSaude" class="editable-field resize-none h-16 p-2">Preocupação em ter algum problema cardíaco devido ao estresse e ao histórico familiar. Nefrolitíase bilateral não obstrutiva.</textarea>
+                </div>
+            </div>
+
+            <p class="font-semibold text-gray-600 mb-2 pt-4 mt-4 border-t">Outros Objetivos Importantes:</p>
+            <ul id="lista-objetivos" data-key-prefix="objetivo_item" class="space-y-2 dynamic-container">
+                <!-- Itens dinâmicos aqui -->
+            </ul>
+            <button onclick="addItem('lista-objetivos', 'objetivo_item', 'Objetivo Padrão')" class="no-print mt-2 text-accent hover:text-sky-700 font-medium text-sm px-3 py-1 bg-gray-100 rounded-lg">+ Adicionar Objetivo</button>
+        </section>
+
+        <!-- Seção 3 e 4: Saúde e Medicamentos (DINÂMICO) -->
+        <section id="saude-medicamentos" class="card bg-white p-6 mb-8 rounded-2xl shadow-lg page-break">
+            <div class="flex items-center mb-4">
+                <span class="text-3xl mr-3 text-accent">💊</span>
+                <h3 class="text-2xl font-bold text-gray-800">3. Medicamentos e 4. Situação Atual de Saúde</h3>
+            </div>
+
+            <!-- 3. Medicamentos de Uso Contínuo (DINÂMICO) -->
+            <p class="font-semibold text-gray-600 mb-2">3. Medicamentos Contínuos (SYNTROID, Tadalafila, Paroxetina):</p>
+            <ul id="lista-medicamentos" data-key-prefix="medicamento" class="space-y-2 dynamic-container text-sm border p-3 rounded-lg bg-accent-light">
+                <!-- Itens dinâmicos aqui -->
+            </ul>
+            <button onclick="addItem('lista-medicamentos', 'medicamento', 'Medicação | Dose | Tempo | Horário')" class="no-print mt-2 text-accent hover:text-sky-700 font-medium text-sm px-3 py-1 bg-gray-100 rounded-lg">+ Adicionar Medicamento</button>
+
+            <!-- 4. Situação Atual de Saúde (DINÂMICO) -->
+            <p class="font-semibold text-gray-600 mb-2 pt-4 mt-4 border-t">4. Condições de Saúde e Sintomas Atuais:</p>
+            <textarea data-key="condicoesSaudeTexto" class="editable-field resize-none h-16 p-2 mb-2" placeholder="Ex: Histórico de Artroscopia no joelho direito (06/05/2022) com uso de antibiótico.">Histórico de Artroscopia no joelho direito (06/05/2022) com uso de antibiótico.</textarea>
+
+            <ul id="lista-sintomas" data-key-prefix="sintoma" class="space-y-2 dynamic-container text-gray-700 list-disc pl-5">
+                <!-- Itens dinâmicos aqui -->
+            </ul>
+            <button onclick="addItem('lista-sintomas', 'sintoma', 'Sintoma/Queixa (Ex: Dor de cabeça, Ansiedade)')" class="no-print mt-2 text-accent hover:text-sky-700 font-medium text-sm px-3 py-1 bg-gray-100 rounded-lg">+ Adicionar Sintoma/Queixa</button>
+        </section>
+
+        <!-- Seções 5, 6, 7 e 8: Digestão, Excreção, Sono e Estresse -->
+        <section id="digestao-sono-estresse" class="card bg-white p-6 mb-8 rounded-2xl shadow-lg page-break">
+            <div class="flex items-center mb-4">
+                <span class="text-3xl mr-3 text-accent">🧠</span>
+                <h3 class="text-2xl font-bold text-gray-800">5. Digestão, 6. Excreção, 7. Sono e 8. Ritmos Mentais</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-3 border rounded-xl bg-accent-light">
+                    <p class="font-semibold text-gray-600 mb-1">5. Digestão e Absorção:</p>
+                    <textarea data-key="digestao" class="editable-field resize-none h-16 p-2">Digestão de carne de boi preparada em churrasco é mais difícil.</textarea>
+                    <p class="font-semibold text-gray-600 mt-2 mb-1">6. Excreção:</p>
+                    <input type="text" data-key="excrecao" value="Padrão normal (1x/dia, Tipo 4 e 5 - Bristol)" class="editable-field">
+                </div>
+
+                <div class="p-3 border rounded-xl">
+                    <p class="font-semibold text-gray-600 mb-1">7. Qualidade do Sono:</p>
+                    <textarea data-key="sono" class="editable-field resize-none h-16 p-2">Dorme em média 8h, sem interrupção, acorda descansado. Ronca, faz respiração bucal. Não tem conhecimento de higiene do sono.</textarea>
+                    <p class="font-semibold text-gray-600 mt-2 mb-1">8. Ritmos Mentais (Estresse/Coping):</p>
+                    <input type="text" data-key="estresse" value="Rotina de trabalho = 8 (em 10). Ansiedade e dificuldade de relaxamento mental." class="editable-field">
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 9: Atividade Física -->
+        <section id="atividade-fisica" class="card bg-white p-6 mb-8 rounded-2xl shadow-lg page-break">
+            <div class="flex items-center mb-4">
+                <span class="text-3xl mr-3 text-accent">🏊</span>
+                <h3 class="text-2xl font-bold text-gray-800">9. Atividade Física</h3>
+            </div>
+
+            <p class="font-semibold text-gray-600 mb-2">Modalidade preferida: <input type="text" data-key="modalidadeAF" value="Atividade física na água." class="editable-field w-1/2"></p>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                    <thead>
+                        <tr class="bg-gray-100 text-sm text-gray-600 uppercase">
+                            <th class="py-2 px-4 border-b">Horário</th>
+                            <th class="py-2 px-4 border-b">2ª</th>
+                            <th class="py-2 px-4 border-b">3ª</th>
+                            <th class="py-2 px-4 border-b">4ª</th>
+                            <th class="py-2 px-4 border-b">5ª</th>
+                            <th class="py-2 px-4 border-b">6ª</th>
+                            <th class="py-2 px-4 border-b">Sábado</th>
+                            <th class="py-2 px-4 border-b">Domingo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="text-center text-gray-700">
+                            <td class="py-2 px-4 border-b font-medium">6:00</td>
+                            <td class="py-2 px-4 border-b"><input type="text" data-key="AF_6h_seg" value="" class="editable-field text-center w-8 p-0" style="border-bottom: 1px solid #ccc;"></td>
+                            <td class="py-2 px-4 border-b"><input type="text" data-key="AF_6h_ter" value="x" class="editable-field text-center w-8 p-0" style="border-bottom: 1px solid #ccc;"></td>
+                            <td class="py-2 px-4 border-b"><input type="text" data-key="AF_6h_qua" value="x" class="editable-field text-center w-8 p-0" style="border-bottom: 1px solid #ccc;"></td>
+                            <td class="py-2 px-4 border-b"><input type="text" data-key="AF_6h_qui" value="x" class="editable-field text-center w-8 p-0" style="border-bottom: 1px solid #ccc;"></td>
+                            <td class="py-2 px-4 border-b"><input type="text" data-key="AF_6h_sex" value="" class="editable-field text-center w-8 p-0" style="border-bottom: 1px solid #ccc;"></td>
+                            <td class="py-2 px-4 border-b"><input type="text" data-key="AF_6h_sab" value="" class="editable-field text-center w-8 p-0" style="border-bottom: 1px solid #ccc;"></td>
+                            <td class="py-2 px-4 border-b"><input type="text" data-key="AF_6h_dom" value="" class="editable-field text-center w-8 p-0" style="border-bottom: 1px solid #ccc;"></td>
+                        </tr>
+                        <tr class="text-center text-gray-700">
+                            <td class="py-2 px-4 border-b font-medium">8:30</td>
+                            <td class="py-2 px-4 border-b"><input type="text" data-key="AF_8h30_seg" value="" class="editable-field text-center w-8 p-0" style="border-bottom: 1px solid #ccc;"></td>
+                            <td class="py-2 px-4 border-b"><input type="text" data-key="AF_8h30_ter" value="" class="editable-field text-center w-8 p-0" style="border-bottom: 1px solid #ccc;"></td>
+                            <td class="py-2 px-4 border-b"><input type="text" data-key="AF_8h30_qua" value="" class="editable-field text-center w-8 p-0" style="border-bottom: 1px solid #ccc;"></td>
+                            <td class="py-2 px-4 border-b"><input type="text" data-key="AF_8h30_qui" value="" class="editable-field text-center w-8 p-0" style="border-bottom: 1px solid #ccc;"></td>
+                            <td class="py-2 px-4 border-b"><input type="text" data-key="AF_8h30_sex" value="" class="editable-field text-center w-8 p-0" style="border-bottom: 1px solid #ccc;"></td>
+                            <td class="py-2 px-4 border-b"><input type="text" data-key="AF_8h30_sab" value="x" class="editable-field text-center w-8 p-0" style="border-bottom: 1px solid #ccc;"></td>
+                            <td class="py-2 px-4 border-b"><input type="text" data-key="AF_8h30_dom" value="" class="editable-field text-center w-8 p-0" style="border-bottom: 1px solid #ccc;"></td>
+                        </tr>
+                        <!-- Adicionar mais linhas aqui, se necessário -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Seção 10 e 11: Exames e Consultas -->
+        <section id="exames-consultas" class="card bg-white p-6 mb-8 rounded-2xl shadow-lg page-break">
+            <div class="flex items-center mb-4">
+                <span class="text-3xl mr-3 text-accent">🔬</span>
+                <h3 class="text-2xl font-bold text-gray-800">10. Exames e 11. Controle de Consultas</h3>
+            </div>
+
+            <p class="font-semibold text-gray-600 mb-2">10. Resultados de Exames Relevantes:</p>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="p-2 border rounded-lg bg-accent-light col-span-2">
+                    <p class="font-medium text-sm text-gray-500">Ferro / Sat. Transferrina:</p>
+                    <input type="text" data-key="exameFerro" value="Ferro: 53 mcg/dL (Ref: 65-175) | Saturação: 16% (Ref: 20-50) - Baixo" class="editable-field">
+                </div>
+                <div class="p-2 border rounded-lg">
+                    <p class="font-medium text-sm text-gray-500">Perfil Lipídico:</p>
+                    <input type="text" data-key="exameLipidio" value="HDL: 40 mg/dL | Triglicerídes: 126 mg/dL" class="editable-field">
+                </div>
+                <div class="p-2 border rounded-lg">
+                    <p class="font-medium text-sm text-gray-500">Outras Observações:</p>
+                    <input type="text" data-key="exameOutros" value="Teste ergométrico: Não compatível com resposta isquêmica. Nefrolitíase bilateral não obstrutiva." class="editable-field">
+                </div>
+            </div>
+
+            <p class="font-semibold text-gray-600 mb-2 pt-4 border-t">11. Últimas Consultas Médicas:</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="p-2 border rounded-lg">
+                    <p class="font-medium text-sm text-gray-500">Cardiologista:</p>
+                    <input type="text" data-key="consultaCardio" value="25/10/2022" class="editable-field">
+                </div>
+                <div class="p-2 border rounded-lg">
+                    <p class="font-medium text-sm text-gray-500">Urologista:</p>
+                    <input type="text" data-key="consultaUrologista" value="01/12/2022" class="editable-field">
+                </div>
+                <div class="p-2 border rounded-lg">
+                    <p class="font-medium text-sm text-gray-500">Otorrino/Sono:</p>
+                    <input type="text" data-key="consultaOtorrino" value="21/12/2022" class="editable-field">
+                </div>
+                <div class="p-2 border rounded-lg">
+                    <p class="font-medium text-sm text-gray-500">Endocrinologista:</p>
+                    <input type="text" data-key="consultaEndocrino" value="Não recorda ter ido" class="editable-field">
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção: Aspectos Gerais da Alimentação -->
+        <section id="aspectos-alimentacao" class="card bg-white p-6 mb-8 rounded-2xl shadow-lg page-break">
+            <div class="flex items-center mb-4">
+                <span class="text-3xl mr-3 text-accent">🍽️</span>
+                <h3 class="text-2xl font-bold text-gray-800">Aspectos Gerais da Alimentação</h3>
+            </div>
+
+            <p class="font-semibold text-gray-600 mb-2">Comportamento Alimentar:</p>
+            <textarea data-key="habitosGerais" class="editable-field resize-none h-16 p-2 mb-4 border rounded-lg" placeholder="Ex: Mastigação lenta. Saciedade não impede de continuar comendo.">Mastigação lenta. Interrompe atividades para comer. Saciedade não impede de continuar comendo. Come sem ter fome (ansiedade no trabalho).</textarea>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-gray-700 mb-4">
+                <div class="p-2 border rounded-lg col-span-1">
+                    <p class="font-medium text-sm text-gray-500">Consumo de Bebidas (Água/Café):</p>
+                    <input type="text" data-key="consumoAgua" value="Água: 2000ml/dia." class="editable-field mb-2">
+                    <input type="text" data-key="consumoCafe" value="Café: 4 xícaras/dia." class="editable-field">
+                </div>
+                <div class="p-2 border rounded-lg col-span-2">
+                    <p class="font-medium text-sm text-gray-500">Bebidas Alcoólicas e Industrializadas:</p>
+                    <input type="text" data-key="consumoAlcool" value="Vinho/Cerveja (2 doses) durante a semana no jantar, e no fim de semana (2 doses) no almoço e jantar." class="editable-field mb-2">
+                    <input type="text" data-key="consumoSuco" value="Suco artificial de pêssego no almoço diariamente." class="editable-field">
+                </div>
+            </div>
+
+            <p class="font-semibold text-gray-600 mb-2 pt-4 border-t">Preferências e Logística:</p>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-2 border rounded-lg">
+                    <p class="font-medium text-sm text-gray-500">GOSTA / Doces:</p>
+                    <input type="text" data-key="gosta" value="Carnes, farofa, pizza." class="editable-field mb-2">
+                    <input type="text" data-key="docesLanches" value="Gosta de doces (saída do trabalho é momento oportuno)." class="editable-field">
+                </div>
+                <div class="p-2 border rounded-lg">
+                    <p class="font-medium text-sm text-gray-500">NÃO GOSTA / Rotina:</p>
+                    <input type="text" data-key="naoGosta" value="Sopa." class="editable-field mb-2">
+                    <input type="text" data-key="logistica" value="Esposa é quem cozinha. Come vegetais todos os dias." class="editable-field">
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção: Recordatório de 24 Horas (DINÂMICO) -->
+        <section id="recordatorio" class="card bg-white p-6 mb-8 rounded-2xl shadow-lg page-break">
+            <div class="flex items-center mb-4">
+                <span class="text-3xl mr-3 text-accent">🕒</span>
+                <h3 class="text-2xl font-bold text-gray-800">Recordatório de 24 Horas</h3>
+            </div>
+
+            <ul id="lista-recordatorio" data-key-prefix="refeicao" class="space-y-3 dynamic-container">
+                <!-- Itens dinâmicos aqui -->
+            </ul>
+            <button onclick="addItem('lista-recordatorio', 'refeicao', 'Horário - Refeição: Conteúdo da Refeição...')" class="no-print mt-4 text-accent hover:text-sky-700 font-medium text-sm px-3 py-1 bg-gray-100 rounded-lg">+ Adicionar Refeição</button>
+        </section>
+
+        <!-- Seção: Questionário de Frequência Alimentar (DINÂMICO) -->
+        <section id="frequencia-alimentar" class="card bg-white p-6 mb-8 rounded-2xl shadow-lg page-break">
+            <div class="flex items-center mb-4">
+                <span class="text-3xl mr-3 text-accent">📊</span>
+                <h3 class="text-2xl font-bold text-gray-800">Questionário de Frequência Alimentar</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <p class="font-semibold text-gray-600 mb-2">Frequente:</p>
+                    <ul id="lista-fa-frequente" data-key-prefix="fa_frequente" class="space-y-2 dynamic-container border p-3 rounded-lg bg-accent-light">
+                        <!-- Itens dinâmicos aqui -->
+                    </ul>
+                    <button onclick="addItem('lista-fa-frequente', 'fa_frequente', 'Ex: Pão de forma normal ou integral')" class="no-print mt-2 text-accent hover:text-sky-700 font-medium text-sm px-3 py-1 bg-gray-100 rounded-lg">+ Adicionar Frequente</button>
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-600 mb-2">Não Frequente:</p>
+                    <ul id="lista-fa-naofrequente" data-key-prefix="fa_naofrequente" class="space-y-2 dynamic-container border p-3 rounded-lg">
+                        <!-- Itens dinâmicos aqui -->
+                    </ul>
+                    <button onclick="addItem('lista-fa-naofrequente', 'fa_naofrequente', 'Ex: Oleaginosas')" class="no-print mt-2 text-accent hover:text-sky-700 font-medium text-sm px-3 py-1 bg-gray-100 rounded-lg">+ Adicionar Não Frequente</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rodapé / Mensagem Final -->
+        <footer class="text-center mt-10 p-6 border-t border-gray-200 text-gray-500 no-print">
+            <p>Lembre-se, estou aqui para te apoiar em cada etapa! A jornada é sua, e eu sou sua guia.</p>
+            <p class="mt-2 text-sm">Este documento é confidencial e destinado exclusivamente ao paciente.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Substitua pelos dados reais do profissional
+        const PROFISSIONAL_INICIAIS = "NT"; // Nutricionista Top
+        const PROFISSIONAL_NOME = "[Nome Nutricionista]";
+
+        // Dados Iniciais (para carregar quando a página inicia)
+        const INITIAL_DATA = {
+            nomePaciente: "[Nome do Paciente]",
+            idadeNasc: "42 anos (28/02/1980)",
+            estadoCivil: "Casado, 1 filho (11 anos)",
+            profissao: "Engenheiro Mecânico - Gerente de Engenharia",
+            peso: "98 Kg (Mantido 12m)",
+            altura: "1,89 m",
+            imc: "27,43 kg/m²",
+            pa: "130/80 (29/11/2022)",
+            objetivoPrincipal: "Perder a barriga (estética) e melhorar a situação do ronco.",
+            dificuldades: "Consumo frequente de álcool e ingestão de doces e biscoitos ao longo dos dias.",
+            preocupacoesSaude: "Preocupação em ter algum problema cardíaco devido ao estresse e ao histórico familiar. Nefrolitíase bilateral não obstrutiva.",
+            condicoesSaudeTexto: "Histórico de Artroscopia no joelho direito (06/05/2022) com uso de antibiótico.",
+            digestao: "Digestão de carne de boi preparada em churrasco é mais difícil.",
+            excrecao: "Padrão normal (1x/dia, Tipo 4 e 5 - Bristol)",
+            sono: "Dorme em média 8h, sem interrupção, acorda descansado. Ronca, faz respiração bucal. Não tem conhecimento de higiene do sono.",
+            estresse: "Rotina de trabalho = 8 (em 10). Ansiedade e dificuldade de relaxamento mental.",
+            modalidadeAF: "Atividade física na água.",
+            AF_6h_ter: "x", AF_6h_qua: "x", AF_6h_qui: "x", AF_8h30_sab: "x",
+            exameFerro: "Ferro: 53 mcg/dL (Ref: 65-175) | Saturação: 16% (Ref: 20-50) - Baixo",
+            exameLipidio: "HDL: 40 mg/dL | Triglicerídes: 126 mg/dL",
+            exameOutros: "Teste ergométrico: Não compatível com resposta isquêmica. Nefrolitíase bilateral não obstrutiva.",
+            consultaCardio: "25/10/2022", consultaUrologista: "01/12/2022", consultaOtorrino: "21/12/2022", consultaEndocrino: "Não recorda ter ido",
+            habitosGerais: "Mastigação lenta. Interrompe atividades para comer. Saciedade não impede de continuar comendo. Come sem ter fome (ansiedade no trabalho).",
+            consumoAgua: "Água: 2000ml/dia.",
+            consumoCafe: "Café: 4 xícaras/dia.",
+            consumoAlcool: "Vinho/Cerveja (2 doses) durante a semana no jantar, e no fim de semana (2 doses) no almoço e jantar.",
+            consumoSuco: "Suco artificial de pêssego no almoço diariamente.",
+            gosta: "Carnes, farofa, pizza.",
+            docesLanches: "Gosta de doces (saída do trabalho é momento oportuno).",
+            naoGosta: "Sopa.",
+            logistica: "Esposa é quem cozinha. Come vegetais todos os dias.",
+            medJejum: "SYNTROID", // Mantido como campo estático de exemplo
+
+            // Dados Dinâmicos (Listas)
+            objetivo_item: [
+                "Alcançar objetivo estético e voltar a usar as roupas desejadas.",
+                "Estabelecer disciplina e rotina alimentar para evitar o consumo aleatório.",
+                "Combater a 'leseira' e aumentar os níveis de energia."
+            ],
+            medicamento: [
+                "Tadalafila 5mg | 1 ano | 19:00",
+                "Paroxetina 20mg | 1 ano | 19:00",
+                "SYNTROID | [Tempo] | [Horário] - Observação: tomar 30min antes do café."
+            ],
+            sintoma: [
+                "Sensibilidades a produtos químicos / odores",
+                "Dor de cabeça",
+                "Dores musculares ou articulares",
+                "Ansiedade"
+            ],
+            refeicao: [
+                "08:00 - Café da manha: 1/2 tapioca com queijo branco e tomates, 1/2 papaia, 2 cafés expressos sem açúcar",
+                "10:00 - Lanche: 1 banana, 2 pedaços de pão de forma com margarina, 2 xícaras de café sem açucar",
+                "12:30 - Almoço: Salada (vinagrete de tomate + grãos de trigo), Arroz, feijão, carne de porco, Gelatina, Suco de pêssego (artificial)",
+                "17:00 - Lanche: Pacote de amendoim doce",
+                "20:00 - Jantar: Salada, tilápia frita no air fryer, berinjela feita no air fryer, vinho tinto"
+            ],
+            fa_frequente: [
+                "Margarina",
+                "Pão de forma normal ou integral",
+                "Doces",
+                "Carne de boi"
+            ],
+            fa_naofrequente: [
+                "Ovo",
+                "Oleaginosas"
+            ]
+        };
+
+        // =================================================================
+        // LÓGICA DE ITENS DINÂMICOS
+        // =================================================================
+
+        // Template para itens dinâmicos (Input + Botão de Remover)
+        const DYNAMIC_ITEM_TEMPLATE = (dataKeyPrefix, initialValue, isList = true) => {
+            const listStyle = isList ?
+                `<span class="text-accent text-lg font-bold mt-1 leading-none mr-2">•</span>` :
+                '';
+            const liClass = isList ? 'flex items-start space-x-1 dynamic-item' : 'flex items-center space-x-1 dynamic-item';
+
+            return `
+                <li class="${liClass}">
+                    ${listStyle}
+                    <input type="text" data-key-prefix="${dataKeyPrefix}" value="${initialValue.replace(/"/g, '&quot;')}" class="editable-field flex-grow ${isList ? 'py-1' : 'py-2'}">
+                    <button onclick="removeItem(this)" class="no-print text-red-500 hover:text-red-700 font-bold ml-2 text-xl leading-none px-2 rounded-full hover:bg-red-100">&times;</button>
+                </li>
+            `;
+        };
+
+        function appendDynamicItem(containerElement, prefix, value) {
+            const isList = containerElement.tagName === 'UL';
+            containerElement.insertAdjacentHTML('beforeend', DYNAMIC_ITEM_TEMPLATE(prefix, value, isList));
+        }
+
+        function addItem(containerId, dataKeyPrefix, defaultValue) {
+            const container = document.getElementById(containerId);
+            if (container) {
+                appendDynamicItem(container, dataKeyPrefix, defaultValue);
+            }
+        }
+
+        function removeItem(buttonElement) {
+            const listItem = buttonElement.closest('li');
+            if (listItem) {
+                listItem.remove();
+            }
+        }
+
+        // =================================================================
+        // LÓGICA DE SALVAR E CARREGAR JSON
+        // =================================================================
+
+        // 1. Coletar todos os dados (estáticos e dinâmicos)
+        function collectData() {
+            const data = {};
+
+            // Coleta campos estáticos (com data-key)
+            document.querySelectorAll('[data-key]').forEach(element => {
+                const key = element.getAttribute('data-key');
+                data[key] = element.value;
+            });
+
+            // Coleta listas dinâmicas (com data-key-prefix)
+            document.querySelectorAll('.dynamic-container').forEach(container => {
+                const prefix = container.getAttribute('data-key-prefix');
+                const values = [];
+                container.querySelectorAll(`[data-key-prefix="${prefix}"]`).forEach(input => {
+                    values.push(input.value);
+                });
+                data[prefix] = values;
+            });
+
+            return data;
+        }
+
+        // 2. Aplicar dados (estáticos e dinâmicos)
+        function applyData(data) {
+            // Aplica campos estáticos
+            for (const key in data) {
+                const element = document.querySelector(`[data-key="${key}"]`);
+                if (element) {
+                    element.value = data[key];
+                }
+            }
+
+            // Aplica listas dinâmicas
+            document.querySelectorAll('.dynamic-container').forEach(container => {
+                const prefix = container.getAttribute('data-key-prefix');
+                const listData = data[prefix];
+
+                // Limpa todos os itens existentes
+                container.innerHTML = '';
+
+                if (listData && Array.isArray(listData)) {
+                    listData.forEach(itemValue => {
+                        appendDynamicItem(container, prefix, itemValue);
+                    });
+                }
+            });
+        }
+
+        // 3. Salvar os dados como JSON no dispositivo
+        function saveDataAsJSON() {
+            const data = collectData();
+            const json = JSON.stringify(data, null, 2);
+
+            // Obter Iniciais do Paciente
+            const nomeCompleto = data.nomePaciente || "Paciente";
+            const nomeParts = nomeCompleto.split(' ').filter(p => p.length > 0);
+            let pacienteIniciais = "NP";
+            if (nomeParts.length >= 2) {
+                pacienteIniciais = nomeParts[0].charAt(0).toUpperCase() + nomeParts[nomeParts.length - 1].charAt(0).toUpperCase();
+            } else if (nomeParts.length === 1) {
+                pacienteIniciais = nomeParts[0].slice(0, 2).toUpperCase();
+            }
+
+            // Formatar Data e Hora
+            const now = new Date();
+            const dateStr = now.getFullYear() +
+                            String(now.getMonth() + 1).padStart(2, '0') +
+                            String(now.getDate()).padStart(2, '0');
+            const timeStr = String(now.getHours()).padStart(2, '0') +
+                            String(now.getMinutes()).padStart(2, '0') +
+                            String(now.getSeconds()).padStart(2, '0');
+
+            // Criar o nome do arquivo: Profissional_IniciaisPaciente_YYYYMMDD_HHMMSS.json
+            const fileName = `${PROFISSIONAL_INICIAIS}_${pacienteIniciais}_${dateStr}_${timeStr}.json`;
+
+            // Criar e baixar o arquivo
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            console.log(`Dados salvos em JSON: ${fileName}`);
+        }
+
+        // 4. Carregar dados de um arquivo JSON do dispositivo
+        function loadJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    applyData(data);
+                    console.log("Dados carregados com sucesso do JSON.");
+                } catch (error) {
+                    console.error("Erro ao carregar ou parsear o arquivo JSON:", error);
+                    alert("Erro ao carregar o arquivo. Verifique se é um arquivo JSON válido.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 5. Carregar dados de um arquivo TXT do dispositivo
+        function loadTXT(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const text = e.target.result;
+                    const data = parseTXT(text);
+                    applyData(data);
+                    console.log("Dados carregados com sucesso do TXT.");
+                } catch (error) {
+                    console.error("Erro ao carregar ou parsear o arquivo TXT:", error);
+                    alert("Erro ao carregar o arquivo. Verifique se é um arquivo TXT válido.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function parseTXT(text) {
+            const data = {};
+            let lastKey = null;
+
+            const validKeys = new Set();
+            document.querySelectorAll('[data-key], [data-key-prefix]').forEach(el => {
+                if (el.dataset.key) validKeys.add(el.dataset.key);
+                if (el.dataset.keyPrefix) validKeys.add(el.dataset.keyPrefix);
+            });
+
+            const listKeys = ['objetivo_item', 'medicamento', 'sintoma', 'refeicao', 'fa_frequente', 'fa_naofrequente'];
+            const textAreaKeys = ['objetivoPrincipal', 'dificuldades', 'preocupacoesSaude', 'condicoesSaudeTexto', 'digestao', 'sono', 'habitosGerais'];
+
+            const lines = text.split('\n');
+
+            lines.forEach(line => {
+                const parts = line.split(/:(.*)/s);
+                const potentialKey = parts.length > 1 ? parts[0].trim() : null;
+
+                if (potentialKey && validKeys.has(potentialKey)) {
+                    const key = potentialKey;
+                    const value = parts[1].trim();
+                    lastKey = key;
+
+                    if (listKeys.includes(key)) {
+                        if (!data[key]) {
+                            data[key] = [];
+                        }
+                        data[key].push(value);
+                    } else {
+                        data[key] = value;
+                    }
+                } else {
+                    if (lastKey && textAreaKeys.includes(lastKey) && data[lastKey] !== undefined) {
+                        data[lastKey] += '\n' + line;
+                    }
+                }
+            });
+            return data;
+        }
+
+        // =================================================================
+        // INICIALIZAÇÃO
+        // =================================================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+             // Carrega os dados iniciais (os dados do paciente fornecidos na primeira query)
+             applyData(INITIAL_DATA);
+
+             // Adiciona listener para styling nos campos estáticos
+             document.querySelectorAll('[data-key]').forEach(field => {
+                field.addEventListener('focus', () => field.classList.add('font-medium'));
+                field.addEventListener('blur', () => field.classList.remove('font-medium'));
+            });
+            console.log("Guia Nutricional interativo carregado e pronto para uso.");
+        });
+
+    </script>
+</body>
+</html>
